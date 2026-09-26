@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LegendIL Launcher: play every Minecraft version</title>
+  <meta name="description" content="The official LegendIL Minecraft launcher. Instances from 1.8.9 to 26.3, Modrinth mods, skins everyone can see, and one-click join to legend-il.net.">
+  <meta name="theme-color" content="#050505">
+  <meta property="og:title" content="LegendIL Launcher">
+  <meta property="og:description" content="Every Minecraft version, every mod, one click to legend-il.net.">
+  <meta property="og:image" content="assets/hero.webp">
+  <link rel="icon" href="assets/icon.png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rubik:wght@400;500;700;800&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* Tokens copied from the LegendIL client (src/styles.css) */
+    :root {
+      --bg: #050505;
+      --surface: #101110;
+      --surface-2: #0c0d0c;
+      --line: #20211e;
+      --line-strong: #34352f;
+      --gold: #e8b84f;
+      --gold-hot: #ffd13b;
+      --gold-soft: #9c7b2d;
+      --text: #f4f4ef;
+      --muted: #aaa9a3;
+      --muted-2: #74746f;
+      --ui: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --pixel: "Silkscreen", ui-monospace, Menlo, Consolas, monospace;
+      --wrap: 1180px;
+    }
+    html[lang="he"] {
+      --ui: "Rubik", "Segoe UI", Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 var(--ui); -webkit-font-smoothing: antialiased; }
+    img { max-width: 100%; height: auto; display: block; }
+    a { color: inherit; }
+    button { font: inherit; color: inherit; cursor: pointer; }
+    :focus-visible { outline: 2px solid var(--gold-hot); outline-offset: 3px; border-radius: 4px; }
+    .wrap { width: min(var(--wrap), 100% - 40px); margin-inline: auto; }
+    .icon { width: 1em; height: 1em; fill: currentColor; flex: none; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+    /* Pixel type: Silkscreen has no Hebrew, so Hebrew headings fall back to Rubik */
+    .px { font-family: var(--pixel); letter-spacing: .5px; }
+    html[lang="he"] .px:not(.keep-px) { font-family: "Rubik", sans-serif; font-weight: 800; letter-spacing: 0; }
+
+    /* ---------- Top bar (mirrors the client's title bar) ---------- */
+    .topbar { position: sticky; top: 0; z-index: 20; height: 67px; border-bottom: 1px solid var(--line); background: rgba(5,5,5,.86); backdrop-filter: blur(12px); }
+    .topbar .wrap { height: 100%; display: flex; align-items: center; gap: 22px; }
+    .brand { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; }
+    .brand .icon { width: 30px; height: 30px; fill: var(--gold); }
+    .brand span { font-family: var(--pixel); font-size: 17px; font-weight: 700; letter-spacing: 3px; color: var(--gold); }
+    .nav { margin-inline-start: auto; display: flex; align-items: center; gap: 6px; }
+    .nav a { padding: 8px 12px; border-radius: 7px; color: var(--muted); font-size: 14px; font-weight: 500; text-decoration: none; }
+    .nav a:hover { color: var(--text); background: var(--surface); }
+    .lang { height: 38px; min-width: 50px; padding: 0 12px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--surface-2); color: var(--text); font-weight: 600; font-size: 14px; }
+    .lang:hover { border-color: #6f591e; color: var(--gold-hot); }
+    .top-dl { height: 38px; padding: 0 14px; display: inline-flex; align-items: center; gap: 8px; border: 1px solid #8d701e; border-radius: 8px; background: #121109; color: var(--gold-hot); font-weight: 600; font-size: 14px; text-decoration: none; }
+    .top-dl:hover { background: #1a170b; }
+
+    /* ---------- Hero: the castle art + the client's gold PLAY button ---------- */
+    .hero { position: relative; min-height: max(640px, min(900px, 96vh)); display: grid; align-items: end; overflow: hidden; border-bottom: 1px solid var(--line); }
+    .hero-art { position: absolute; inset: 0 0 24% 0; background: url("assets/hero.webp") center top / cover no-repeat; }
+    .hero-art::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(5,5,5,.05) 0%, rgba(5,5,5,.15) 55%, rgba(5,5,5,.85) 82%, var(--bg) 100%); }
+    .hero-body { position: relative; padding: 0 0 72px; text-align: center; }
+    .hero h1 { margin: 0 auto; max-width: 24ch; font-size: clamp(26px, 3.4vw, 42px); line-height: 1.1; text-shadow: 0 4px 30px rgba(0,0,0,.7); }
+    .hero p { margin: 16px auto 0; max-width: 60ch; color: #d6d5cf; font-size: clamp(16px, 1.6vw, 19px); text-shadow: 0 2px 12px rgba(0,0,0,.8); }
+    .play { position: relative; margin: 34px auto 0; width: min(420px, 100%); height: 74px; display: grid; grid-template-columns: 62px 1fr 62px; align-items: center; border: 1px solid #ffe451; border-radius: 8px; background: linear-gradient(180deg, #f7d34a 0%, #efb92e 100%); color: #090909; box-shadow: 0 5px 0 rgba(94,68,8,.44), inset 0 1px 0 rgba(255,255,255,.34); font-family: var(--pixel); font-size: 23px; font-weight: 700; letter-spacing: 1px; text-decoration: none; transition: filter .1s ease, transform .1s ease; }
+    html[lang="he"] .play { font-family: "Rubik", sans-serif; font-weight: 800; letter-spacing: 0; }
+    .play:hover { filter: brightness(1.045); }
+    .play:active { transform: translateY(2px); box-shadow: 0 3px 0 rgba(94,68,8,.44); }
+    .play .icon { width: 26px; height: 26px; justify-self: center; }
+    html[dir="rtl"] .play .icon { transform: scaleX(-1); }
+    .dl-meta { margin-top: 18px; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+    .dl-meta span { padding: 5px 10px; border: 1px solid #33342e; border-radius: 5px; background: rgba(12,13,12,.75); color: #b9b8b2; font-size: 13px; }
+    .dl-meta .ok { border-color: #3d491d; color: #a9bf45; }
+    .dl-alt { margin-top: 14px; color: var(--muted); font-size: 14px; }
+    .dl-alt a { color: var(--gold); }
+
+    /* ---------- Product shot ---------- */
+    .shot-frame { margin: -40px auto 0; position: relative; z-index: 2; border: 1px solid var(--line-strong); border-radius: 14px; overflow: hidden; background: var(--surface-2); box-shadow: 0 40px 90px rgba(0,0,0,.65), 0 0 0 6px rgba(232,184,79,.04); }
+
+    /* ---------- Sections ---------- */
+    section { padding: 96px 0 0; }
+    .section-title { margin: 0 0 12px; font-size: clamp(22px, 2.6vw, 30px); line-height: 1.2; color: var(--text); }
+    .lead { margin: 0; max-width: 60ch; color: var(--muted); font-size: 17px; }
+
+    .feature { display: grid; grid-template-columns: 1fr 1.25fr; gap: 56px; align-items: center; padding: 56px 0; border-bottom: 1px solid var(--line); }
+    .feature:last-of-type { border-bottom: 0; }
+    .feature.flip { grid-template-columns: 1.25fr 1fr; }
+    .feature.flip .copy { order: 2; }
+    .feature h3 { margin: 0 0 12px; font-size: 24px; line-height: 1.25; }
+    .feature p { margin: 0; color: var(--muted); max-width: 46ch; }
+    .feature ul { margin: 18px 0 0; padding: 0; list-style: none; display: grid; gap: 9px; }
+    .feature li { display: flex; gap: 10px; align-items: baseline; color: #d0cfc9; font-size: 15px; }
+    .feature li::before { content: ""; flex: none; width: 7px; height: 7px; background: var(--gold); transform: translateY(-2px); }
+    .feature .pic { border: 1px solid var(--line-strong); border-radius: 12px; overflow: hidden; background: var(--surface-2); }
+    .tag { display: inline-block; margin-bottom: 14px; padding: 4px 7px; border: 1px solid #594717; border-radius: 4px; color: #b29131; font-family: var(--pixel); font-size: 10px; }
+
+    .small-features { margin-top: 8px; display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+    .small-features > div { padding: 24px; background: var(--surface-2); }
+    .small-features > div + div { border-inline-start: 1px solid var(--line); }
+    .small-features strong { display: block; margin-bottom: 6px; font-size: 16px; }
+    .small-features span { color: var(--muted); font-size: 14px; }
+
+    /* ---------- Install (a real sequence, so it is numbered) ---------- */
+    .steps { margin: 36px 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; counter-reset: step; border-top: 1px solid var(--line); }
+    .steps li { position: relative; padding: 26px 22px 0 0; counter-increment: step; }
+    html[dir="rtl"] .steps li { padding: 26px 0 0 22px; }
+    .steps li::before { content: counter(step); display: grid; place-items: center; width: 38px; height: 38px; margin-bottom: 16px; border: 1px solid #8d701e; border-radius: 8px; background: #121109; color: var(--gold-hot); font-family: var(--pixel); font-size: 17px; }
+    .steps strong { display: block; margin-bottom: 6px; }
+    .steps span { color: var(--muted); font-size: 14px; }
+    .steps code { padding: 1px 6px; border: 1px solid var(--line-strong); border-radius: 4px; background: var(--surface); color: #d6d5cf; font-size: 13px; }
+
+    /* ---------- Windows warning ---------- */
+    .notice { margin-top: 44px; display: grid; grid-template-columns: auto 1fr; gap: 22px; padding: 28px; border: 1px solid #453a18; border-radius: 14px; background: linear-gradient(180deg, #121109, #0c0d0c 70%); }
+    .notice .icon { width: 34px; height: 34px; fill: var(--gold); }
+    .notice h3 { margin: 0 0 8px; font-size: 19px; }
+    .notice p { margin: 0 0 10px; color: #c5c4be; max-width: 72ch; }
+    .notice p:last-child { margin-bottom: 0; }
+    .notice b { color: var(--text); }
+
+    /* ---------- FAQ ---------- */
+    .faq { margin-top: 30px; border-top: 1px solid var(--line); }
+    .faq details { border-bottom: 1px solid var(--line); }
+    .faq summary { list-style: none; display: flex; justify-content: space-between; gap: 20px; padding: 20px 0; cursor: pointer; font-weight: 600; font-size: 17px; }
+    .faq summary::-webkit-details-marker { display: none; }
+    .faq summary::after { content: "+"; color: var(--gold); font-family: var(--pixel); font-size: 20px; line-height: 1; }
+    .faq details[open] summary::after { content: "−"; }
+    .faq p { margin: -6px 0 20px; max-width: 70ch; color: var(--muted); }
+
+    /* ---------- Community + footer ---------- */
+    .community { margin-top: 96px; padding: 44px; display: flex; align-items: center; justify-content: space-between; gap: 30px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface-2); }
+    .community h2 { margin: 0 0 6px; font-size: 24px; }
+    .community p { margin: 0; color: var(--muted); }
+    .discord { flex: none; height: 50px; padding: 0 22px; display: inline-flex; align-items: center; gap: 10px; border: 1px solid #8d701e; border-radius: 8px; background: #121109; color: var(--gold-hot); font-weight: 600; text-decoration: none; }
+    .discord:hover { background: #1a170b; }
+    footer { margin-top: 80px; padding: 34px 0 44px; border-top: 1px solid var(--line); color: var(--muted-2); font-size: 14px; }
+    footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 18px 40px; }
+    .credits { display: flex; flex-wrap: wrap; gap: 8px 22px; }
+    .credits b { color: #d0cfc9; font-weight: 600; }
+    .credits a { color: #d0cfc9; }
+    .legal { flex-basis: 100%; font-size: 13px; }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 900px) {
+      .nav a { display: none; }
+      .feature, .feature.flip { grid-template-columns: 1fr; gap: 28px; }
+      .feature.flip .copy { order: 0; }
+      .small-features { grid-template-columns: 1fr; }
+      .small-features > div + div { border-inline-start: 0; border-top: 1px solid var(--line); }
+      .steps { grid-template-columns: 1fr 1fr; row-gap: 12px; }
+      .community { flex-direction: column; align-items: flex-start; }
+    }
+    @media (max-width: 560px) {
+      .hero { min-height: 0; }
+      .hero-art { inset: 0 0 auto 0; height: 250px; background-size: cover; background-position: center top; }
+      .hero-art::after { background: linear-gradient(180deg, rgba(5,5,5,0) 55%, var(--bg) 100%); }
+      .hero-body { padding: 232px 0 64px; }
+      .top-dl span { display: none; }
+      .brand span { font-size: 14px; letter-spacing: 2px; }
+      .steps { grid-template-columns: 1fr; }
+      .notice { grid-template-columns: 1fr; padding: 22px; }
+      .community { padding: 26px; }
+      section { padding-top: 70px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .play, .play:active { transition: none; transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="pi-crown" viewBox="0 0 24 24"><path d="M3 3h2v12H3zm16 0h2v12h-2zm-8 0h2v2h-2zM9 5h2v2H9zM5 5h2v2H5z"/><path d="M3 3h2v2H3zm4 4h2v2H7zm6-2h2v2h-2zm2 2h2v2h-2zm2-2h2v2h-2zM5 15h14v2H5zm-2 4h18v2H3z"/></symbol>
+    <symbol id="pi-play" viewBox="0 0 24 24"><path d="M15 11h-2V9h2zm0 4h-2v-2h2zm-2 2h-2v-2h2zm0-8h-2V7h2zm-2-2H9V5h2zM9 21H7V3h2zm6-8h2v-2h-2zm-6 4h2v2H9z"/></symbol>
+    <symbol id="pi-down" viewBox="0 0 24 24"><path d="M11 3h2v12h-2zm-4 8h2v2H7zm2 2h2v2H9zm6-2h2v2h-2zm-2 2h2v2h-2zM4 19h16v2H4z"/></symbol>
+    <symbol id="pi-shield" viewBox="0 0 24 24"><path d="M5 3h14v2H5zM3 5h2v8H3zm16 0h2v8h-2zM5 13h2v3H5zm12 0h2v3h-2zM7 16h2v2H7zm8 0h2v2h-2zm-6 2h2v2H9zm4 0h2v2h-2zm-2 2h2v2h-2zm0-13h2v5h-2zm0 7h2v2h-2z"/></symbol>
+    <symbol id="pi-chat" viewBox="0 0 24 24"><path d="M4 3h16v2H4zM2 5h2v11H2zm18 0h2v11h-2zM4 16h6v2H4zm8 0h8v2h-8zm-2 2h2v2h-2zM7 9h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z"/></symbol>
+  </svg>
+
+  <header class="topbar">
+    <div class="wrap">
+      <a class="brand" href="#top" aria-label="LegendIL Launcher"><svg class="icon"><use href="#pi-crown"/></svg><span>LEGENDIL</span></a>
+      <nav class="nav" aria-label="Main">
+        <a href="#features" data-i18n="nav.features">Features</a>
+        <a href="#install" data-i18n="nav.install">Install</a>
+        <a href="#faq" data-i18n="nav.faq">FAQ</a>
+      </nav>
+      <button class="lang" id="langToggle" type="button" aria-label="עברית">עב</button>
+      <a class="top-dl" data-download href="#install"><svg class="icon"><use href="#pi-down"/></svg><span data-i18n="nav.download">Download</span></a>
+    </div>
+  </header>
+
+  <main id="top">
+    <div class="hero">
+      <div class="hero-art" role="img" aria-label="LegendIL castle"></div>
+      <div class="wrap hero-body">
+        <h1 class="px" data-i18n="hero.title">Every version. Every mod. One click to LegendIL.</h1>
+        <p data-i18n="hero.text">The official launcher for legend-il.net. Play Minecraft 1.8.9 to 26.3 in separate instances, install mods from Modrinth, and join the server in one click.</p>
+        <a class="play" data-download href="#install"><svg class="icon"><use href="#pi-play"/></svg><span data-i18n="hero.cta">DOWNLOAD</span><span></span></a>
+        <div class="dl-meta">
+          <span data-i18n="meta.os">Windows 10 / 11 · 64-bit</span>
+          <span id="dlVersion" dir="ltr">v1.0.0</span>
+          <span id="dlSize" dir="ltr">Installer</span>
+          <span class="ok" data-i18n="meta.free">Free</span>
+        </div>
+        <p class="dl-alt"><span data-i18n="hero.need">Requires Minecraft: Java Edition.</span> <a id="releasesLink" href="#" data-i18n="hero.all">All releases</a></p>
+      </div>
+    </div>
+
+    <div class="wrap">
+      <figure class="shot-frame" style="margin-bottom:0">
+        <img src="assets/shot-home.webp" width="1400" height="805" alt="The LegendIL Launcher home screen" data-i18n-alt="alt.home" loading="eager">
+      </figure>
+    </div>
+
+    <section id="features" class="wrap" aria-labelledby="featuresTitle">
+      <h2 class="section-title px" id="featuresTitle" data-i18n="features.title">What it does</h2>
+      <p class="lead" data-i18n="features.lead">Built like the Modrinth App, made for our server.</p>
+
+      <div class="feature">
+        <div class="copy">
+          <span class="tag keep-px">INSTANCES</span>
+          <h3 data-i18n="f1.title">A separate Minecraft for every version</h3>
+          <p data-i18n="f1.text">Each instance has its own version, loader, mods, worlds and settings, so nothing breaks when you switch.</p>
+          <ul>
+            <li data-i18n="f1.a">Any release from 1.8.9 to 26.3</li>
+            <li data-i18n="f1.b">Vanilla, Fabric, Quilt, Forge or NeoForge</li>
+            <li data-i18n="f1.c">Separate RAM per instance, rename and duplicate</li>
+          </ul>
+        </div>
+        <div class="pic"><img src="assets/shot-instances.webp" width="1400" height="805" alt="Instances list in the launcher" data-i18n-alt="alt.instances" loading="lazy"></div>
+      </div>
+
+      <div class="feature flip">
+        <div class="copy">
+          <span class="tag keep-px">MODRINTH</span>
+          <h3 data-i18n="f2.title">Mods, modpacks, texture packs and shaders</h3>
+          <p data-i18n="f2.text">Search Modrinth inside the launcher. Results only show what works with the instance you picked, and dependencies install automatically.</p>
+          <ul>
+            <li data-i18n="f2.a">Check for updates and update everything at once</li>
+            <li data-i18n="f2.b">Turn mods off without deleting them</li>
+            <li data-i18n="f2.c">Import and export .mrpack modpacks</li>
+          </ul>
+        </div>
+        <div class="pic"><img src="assets/shot-content.webp" width="1400" height="805" alt="Installed mods with updates available" data-i18n-alt="alt.content" loading="lazy"></div>
+      </div>
+
+      <div class="feature">
+        <div class="copy">
+          <span class="tag keep-px">SKINS</span>
+          <h3 data-i18n="f3.title">Skins and capes everyone can see</h3>
+          <p data-i18n="f3.text">Preview skins in 3D, then use one: it is saved to your Minecraft account, so other players see it on every online server. Pick your cape the same way.</p>
+          <ul>
+            <li data-i18n="f3.a">Upload a PNG or copy a skin by player name</li>
+            <li data-i18n="f3.b">Classic and slim arm models</li>
+          </ul>
+        </div>
+        <div class="pic"><img src="assets/shot-skins.webp" width="1400" height="805" alt="Skin wardrobe with 3D preview" data-i18n-alt="alt.skins" loading="lazy"></div>
+      </div>
+
+      <div class="small-features">
+        <div><strong data-i18n="s1.title">One-click join</strong><span data-i18n="s1.text">Quick Join opens Minecraft straight into legend-il.net.</span></div>
+        <div><strong data-i18n="s2.title">Java included</strong><span data-i18n="s2.text">The right Java version downloads automatically for each Minecraft version.</span></div>
+        <div><strong data-i18n="s3.title">Secure sign-in</strong><span data-i18n="s3.text">You sign in with your Microsoft account. Your password never touches the launcher.</span></div>
+      </div>
+    </section>
+
+    <section id="install" class="wrap" aria-labelledby="installTitle">
+      <h2 class="section-title px" id="installTitle" data-i18n="install.title">Install in a minute</h2>
+      <ol class="steps">
+        <li><strong data-i18n="st1.title">Download</strong><span data-i18n-html="st1.text">Get <code>LegendIL-Launcher-Setup.exe</code> with the button above.</span></li>
+        <li><strong data-i18n="st2.title">Install</strong><span data-i18n="st2.text">Run the installer and follow the steps. It adds a desktop shortcut.</span></li>
+        <li><strong data-i18n="st3.title">Open</strong><span data-i18n-html="st3.text">Open <code>LegendIL Launcher</code> from the desktop or the Start menu.</span></li>
+        <li><strong data-i18n="st4.title">Sign in and play</strong><span data-i18n="st4.text">Sign in with Microsoft, then press Play.</span></li>
+      </ol>
+
+      <div class="notice" role="note">
+        <svg class="icon" aria-hidden="true"><use href="#pi-shield"/></svg>
+        <div>
+          <h3 data-i18n="warn.title">Seeing "Windows protected your PC"?</h3>
+          <p data-i18n-html="warn.p1">That screen appears because the launcher is not digitally signed yet. A code-signing certificate costs hundreds of dollars a year, and Windows shows this warning for every new program without one, whatever is inside it.</p>
+          <p data-i18n-html="warn.p2">Click <b>More info</b>, then <b>Run anyway</b>. You only need to do this once.</p>
+          <p data-i18n-html="warn.p3"><b>Only download from this site or our Discord.</b> If someone sends you a "special version" of the launcher in private messages, do not open it and report it to the staff.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq" class="wrap" aria-labelledby="faqTitle">
+      <h2 class="section-title px" id="faqTitle" data-i18n="faq.title">Questions</h2>
+      <div class="faq">
+        <details><summary data-i18n="q1">Do I need to own Minecraft?</summary><p data-i18n="a1">Yes. The launcher signs in with your Microsoft account and requires Minecraft: Java Edition.</p></details>
+        <details><summary data-i18n="q2">Is it free?</summary><p data-i18n="a2">Yes, the launcher is completely free.</p></details>
+        <details><summary data-i18n="q3">Why is the first launch slow?</summary><p data-i18n="a3">The first time you play a version, the launcher downloads Minecraft, Java and the mod loader. After that it starts quickly.</p></details>
+        <details><summary data-i18n="q4">Will my skin show on other servers?</summary><p data-i18n="a4">Yes. The skin is saved to your Minecraft account, so it shows on every online-mode server and in every launcher.</p></details>
+        <details><summary data-i18n="q5">Mac or Linux?</summary><p data-i18n="a5">Right now the download is for Windows. Other systems may come later.</p></details>
+        <details><summary data-i18n="q6">I found a bug. Where do I report it?</summary><p data-i18n="a6">Open a ticket in our Discord with a screenshot of the error.</p></details>
+      </div>
+    </section>
+
+    <div class="wrap">
+      <div class="community">
+        <div>
+          <h2 class="px" data-i18n="c.title">Join the community</h2>
+          <p data-i18n="c.text">News, updates and support live in the LegendIL Discord.</p>
+        </div>
+        <a class="discord" href="https://discord.gg/RwVnVrhqUN" target="_blank" rel="noopener"><svg class="icon" style="width:20px;height:20px"><use href="#pi-chat"/></svg><span data-i18n="c.cta">Join the Discord</span></a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <div class="credits">
+        <span><b>itsrealnoam</b> · <span data-i18n="cr.noam">Lead developer, Project Manager</span></span>
+        <span><b>rolexori</b> · <span data-i18n="cr.rolex">Project Manager</span></span>
+        <span><a href="https://itaydev.space/" target="_blank" rel="noopener">itaydev.space</a> · <span data-i18n="cr.itay">Lead developer</span></span>
+      </div>
+      <span>© <span id="year">2026</span> LegendIL · legend-il.net</span>
+      <p class="legal" data-i18n="legal">Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft.</p>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== Settings: change these two lines after creating the GitHub repository ===== */
+    const GITHUB_USER = 'dbdhrhhe8-pixel';
+    const GITHUB_REPO = 'legendil-launcher';
+    const DOWNLOAD_FILE = 'LegendIL-Launcher-Setup.exe';
+    /* ================================================================================ */
+
+    const configured = GITHUB_USER !== 'YOUR-GITHUB-NAME';
+    const releasesUrl = `https://github.com/${GITHUB_USER}/${GITHUB_REPO}/releases`;
+    const downloadUrl = `${releasesUrl}/latest/download/${DOWNLOAD_FILE}`;
+    document.querySelectorAll('[data-download]').forEach((link) => { if (configured) link.href = downloadUrl; });
+    document.getElementById('releasesLink').href = configured ? releasesUrl : '#install';
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Real version + size from the latest GitHub release (falls back to the defaults above).
+    if (configured) {
+      fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/releases/latest`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((release) => {
+          if (!release) return;
+          const asset = (release.assets || []).find((a) => a.name === DOWNLOAD_FILE);
+          if (release.tag_name) document.getElementById('dlVersion').textContent = release.tag_name;
+          if (asset?.size) document.getElementById('dlSize').textContent = `${Math.round(asset.size / 1048576)} MB`;
+        })
+        .catch(() => {});
+    }
+
+    const HE = {
+      'nav.features': 'יכולות', 'nav.install': 'התקנה', 'nav.faq': 'שאלות', 'nav.download': 'הורדה',
+      'hero.title': 'כל גרסה. כל מוד. לחיצה אחת ל-LegendIL.',
+      'hero.text': 'הלאנצ\'ר הרשמי של \u2066legend-il.net\u2069. משחקים ב-Minecraft מ-\u20661.8.9\u2069 ועד \u206626.3\u2069 ב-instances נפרדים, מתקינים מודים מ-Modrinth ונכנסים לשרת בלחיצה אחת.',
+      'hero.cta': 'הורדה', 'meta.os': '\u2066Windows 10 / 11\u2069 · 64 ביט', 'meta.free': 'חינם',
+      'hero.need': 'נדרש \u2066Minecraft: Java Edition\u2069.', 'hero.all': 'כל הגרסאות',
+      'features.title': 'מה הוא עושה', 'features.lead': 'בנוי כמו Modrinth App, מותאם לשרת שלנו.',
+      'f1.title': 'Minecraft נפרד לכל גרסה', 'f1.text': 'לכל instance יש גרסה, loader, מודים, עולמות והגדרות משלו, כך ששום דבר לא נשבר כשעוברים ביניהם.',
+      'f1.a': 'כל גרסה מ-1.8.9 ועד 26.3', 'f1.b': 'Vanilla, Fabric, Quilt, Forge או NeoForge', 'f1.c': 'RAM נפרד לכל instance, שינוי שם ושכפול',
+      'f2.title': 'מודים, מודפאקים, טקסצ\'ר פאקים ושיידרים', 'f2.text': 'מחפשים ב-Modrinth ישר מתוך הלאנצ\'ר. התוצאות מציגות רק מה שעובד עם ה-instance שבחרתם, ו-dependencies מותקנים אוטומטית.',
+      'f2.a': 'בדיקת עדכונים ועדכון של הכל בלחיצה', 'f2.b': 'כיבוי מודים בלי למחוק אותם', 'f2.c': 'ייבוא וייצוא של מודפאקים (.mrpack)',
+      'f3.title': 'סקינים וגלימות שכולם רואים', 'f3.text': 'רואים את הסקין בתלת-ממד, ובלחיצה הוא נשמר בחשבון Minecraft שלכם, כך ששחקנים אחרים רואים אותו בכל שרת אונליין. גלימות בוחרים באותה דרך.',
+      'f3.a': 'העלאת PNG או העתקת סקין לפי שם שחקן', 'f3.b': 'ידיים רגילות או דקות (Slim)',
+      's1.title': 'כניסה בלחיצה', 's1.text': 'Quick Join פותח את Minecraft ישר לתוך legend-il.net.',
+      's2.title': 'Java כלול', 's2.text': 'גרסת ה-Java המתאימה יורדת אוטומטית לכל גרסת Minecraft.',
+      's3.title': 'התחברות מאובטחת', 's3.text': 'מתחברים עם חשבון Microsoft. הסיסמה שלכם לא עוברת דרך הלאנצ\'ר.',
+      'install.title': 'התקנה בדקה',
+      'st1.title': 'מורידים', 'st1.text': 'מורידים את <code>LegendIL-Launcher-Setup.exe</code> מהכפתור למעלה.',
+      'st2.title': 'מתקינים', 'st2.text': 'מריצים את קובץ ההתקנה ועוברים על השלבים. נוצר קיצור דרך בשולחן העבודה.',
+      'st3.title': 'פותחים', 'st3.text': 'פותחים את <code>LegendIL Launcher</code> משולחן העבודה או מתפריט התחל.',
+      'st4.title': 'מתחברים ומשחקים', 'st4.text': 'מתחברים עם Microsoft ולוחצים Play.',
+      'warn.title': 'מופיע "Windows הגן על המחשב שלך"?',
+      'warn.p1': 'המסך הזה מופיע כי הלאנצ\'ר עדיין לא חתום דיגיטלית. תעודת חתימה עולה מאות דולרים בשנה, ו-Windows מציג את האזהרה לכל תוכנה חדשה בלי תעודה, בלי קשר למה שיש בה.',
+      'warn.p2': 'לוחצים <b>מידע נוסף</b> ואז <b>הפעל בכל זאת</b>. צריך לעשות את זה רק פעם אחת.',
+      'warn.p3': '<b>תורידו רק מהאתר הזה או מהדיסקורד שלנו.</b> אם מישהו שולח לכם בפרטי "גרסה מיוחדת" של הלאנצ\'ר, אל תפתחו אותה ותדווחו לצוות.',
+      'faq.title': 'שאלות',
+      'q1': 'צריך Minecraft מקורי?', 'a1': 'כן. הלאנצ\'ר מתחבר עם חשבון Microsoft ודורש \u2066Minecraft: Java Edition\u2069.',
+      'q2': 'זה בחינם?', 'a2': 'כן, הלאנצ\'ר חינמי לגמרי.',
+      'q3': 'למה ההפעלה הראשונה איטית?', 'a3': 'בפעם הראשונה שמשחקים בגרסה, הלאנצ\'ר מוריד את Minecraft, Java וה-loader. אחרי זה הוא עולה מהר.',
+      'q4': 'הסקין שלי יופיע גם בשרתים אחרים?', 'a4': 'כן. הסקין נשמר בחשבון Minecraft שלכם, אז הוא מופיע בכל שרת אונליין ובכל לאנצ\'ר.',
+      'q5': 'Mac או Linux?', 'a5': 'כרגע ההורדה היא ל-Windows. מערכות אחרות אולי יגיעו בהמשך.',
+      'q6': 'מצאתי באג. איפה מדווחים?', 'a6': 'פותחים טיקט בדיסקורד שלנו עם צילום מסך של השגיאה.',
+      'c.title': 'הצטרפו לקהילה', 'c.text': 'עדכונים, חדשות ותמיכה בדיסקורד של LegendIL.', 'c.cta': 'הצטרפות לדיסקורד',
+      'cr.noam': 'Lead developer, Project Manager', 'cr.rolex': 'Project Manager', 'cr.itay': 'Lead developer',
+      'legal': 'לא מוצר רשמי של Minecraft. לא מאושר על ידי Mojang או Microsoft ולא קשור אליהן.',
+      'alt.home': 'מסך הבית של LegendIL Launcher', 'alt.instances': 'רשימת ה-instances בלאנצ\'ר', 'alt.content': 'מודים מותקנים עם עדכונים זמינים', 'alt.skins': 'ארון הסקינים עם תצוגת תלת-ממד'
+    };
+
+    // Remember the English text so switching back is exact.
+    const EN = {};
+    document.querySelectorAll('[data-i18n]').forEach((el) => { EN[el.dataset.i18n] = el.textContent; });
+    document.querySelectorAll('[data-i18n-html]').forEach((el) => { EN[el.dataset.i18nHtml] = el.innerHTML; });
+    document.querySelectorAll('[data-i18n-alt]').forEach((el) => { EN[el.dataset.i18nAlt] = el.alt; });
+    const EN_TITLE = document.title;
+
+    function setLanguage(lang) {
+      const he = lang === 'he';
+      const dict = he ? HE : EN;
+      document.documentElement.lang = he ? 'he' : 'en';
+      document.documentElement.dir = he ? 'rtl' : 'ltr';
+      document.querySelectorAll('[data-i18n]').forEach((el) => { if (dict[el.dataset.i18n]) el.textContent = dict[el.dataset.i18n]; });
+      document.querySelectorAll('[data-i18n-html]').forEach((el) => { if (dict[el.dataset.i18nHtml]) el.innerHTML = dict[el.dataset.i18nHtml]; });
+      document.querySelectorAll('[data-i18n-alt]').forEach((el) => { if (dict[el.dataset.i18nAlt]) el.alt = dict[el.dataset.i18nAlt]; });
+      document.title = he ? 'LegendIL Launcher: כל גרסה של Minecraft' : EN_TITLE;
+      const toggle = document.getElementById('langToggle');
+      toggle.textContent = he ? 'EN' : 'עב';
+      toggle.setAttribute('aria-label', he ? 'English' : 'עברית');
+      try { localStorage.setItem('legendil-lang', he ? 'he' : 'en'); } catch {}
+    }
+
+    document.getElementById('langToggle').addEventListener('click', () => {
+      setLanguage(document.documentElement.lang === 'he' ? 'en' : 'he');
+    });
+
+    let saved = null;
+    try { saved = localStorage.getItem('legendil-lang'); } catch {}
+    const fromUrl = new URLSearchParams(location.search).get('lang');
+    if (fromUrl === 'he' || fromUrl === 'en') setLanguage(fromUrl);
+    else if (saved === 'he') setLanguage('he');
+  </script>
+</body>
+</html>
